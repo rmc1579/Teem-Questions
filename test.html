@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IMBD Search</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="test.js" type="text/javascript"></script>
+
+    <style>
+        .btn-default{
+            margin-top: 25px;
+        }
+        .poster-img{
+            float: right;
+            max-width: 200px;
+            margin: 0px 10px 10px; 
+        }
+        .poster-no-img{
+            border: solid 1px #000;
+        }
+    </style>
+</head>
+<body>
+    
+<script>
+    var actorsArray = [];
+    var moviesArray = [];
+    function searchMovies(searchkey){
+        
+        
+        if(searchkey == 'title' && $("#title").val()){
+            $("#results-section").show();
+            var title = $("#title").val();
+            resetFields();
+            hideResults();
+
+            $.get("https://api.themoviedb.org/3/search/movie?api_key=516690c20ed973d48083f5d124cf339d&query='"+title+"'")
+                .then(function (data){
+                    let text = '';
+                    let name = '';
+                    let movies = '<b>Filmography :</b><br />';
+                    let img = '';
+                    let imgholder = 'no-image.jpg'
+                    let summary = '<b>Summary :</b><br />';
+                    
+                    for (var k in data.results){
+                        
+                        
+                        name = name + "<div class='row'><b>Movie Title : </b> " + data.results[k].title + "<br /><br />";
+                        
+                        summary = summary + data.results[k].overview + "<br />";
+                        if (data.results[k].poster_path != null){
+                            img = "<img class='img-responsive poster-img' src='https://image.tmdb.org/t/p/w300"+ data.results[k].poster_path + "' alt='' />";
+                        }
+                        else{
+                            img = "<img class='img-responsive poster-img poster-no-img' src='/"+ imgholder + "' alt='' />";
+                        }
+                        
+                        
+                        name = name + img + summary + "<br /></div>";
+                    }
+                    
+                    text = name;
+                
+                    $("#results-error").html('');
+                    $("#results-director").html(text);
+                    $("#results-director").show();
+                
+                }).catch(function (obj, status, error){
+                    $("#results-error").html("<h3 class='alert alert-warning text-center'><b>NOT Results Found.</b><br /> Please Try a Different Keyword.</h3>");
+                    hideResults();
+            });
+            
+            
+            $("#title").val(title);
+
+        }
+        if (searchkey == 'director' && $("#director").val()){
+            $("#results-section").show();
+            var director = $("#director").val();
+            resetFields();
+            
+            $.get("https://api.themoviedb.org/3/search/person?api_key=516690c20ed973d48083f5d124cf339d&query="+director+"&sort_by=popularity.asce")
+                .then(function (data){
+                    let text = '';
+                    let name = '';
+                    let movies = '<b>Filmography :</b><br />';
+                    let img = '';
+                    
+                    for (var k in data.results){
+                         
+                        name = name + "<div><b>Actor Name : </b> " + data.results[k].name + "<br /><br />";    
+                        
+                        
+                        //img = img + "<div class='col-md-2'><img class='img-responsive' src='https://image.tmdb.org/t/p/w300/"+ data.results[k].profile_path + "' alt='' /></div>";
+                        for (var i in data.results[k].known_for){
+                            movies = movies + data.results[k].known_for[i].title + "<br /></div>";
+                        }
+                        
+                        name = name + movies + "<br />";
+                        
+                        
+                        
+                    }
+                    text = name;
+                    
+                
+                    $("#results-error").html('');
+                    $("#results-director").html(text);
+                    $("#results-director").show();
+                    
+                
+                }).catch(function (obj, status, error){
+                    $("#results-error").html("<h3 class='alert alert-warning text-center'><b>NOT Results Found.</b><br /> Please Try a Different Keyword.</h3>");
+                    hideResults();
+            });
+            
+            
+            
+            
+            $("#director").val(director);
+        }
+        
+        
+        if (searchkey == 'actor' && $("#actor").val()){
+            $("#results-section").show();
+            var actor =  $("#actor").val();
+            resetFields();
+            
+            $.get("https://api.themoviedb.org/3/search/person?api_key=516690c20ed973d48083f5d124cf339d&query="+actor+"&sort_by=popularity.asce")
+                .then(function (data){
+                    let text = '';
+                    let name = '';
+                    let movies = '<b>Filmography :</b><br />';
+                    let img = '';
+                    let imgholder = 'no-image.jpg'
+                    
+                    for (var k in data.results){
+                        
+                        name = name + "<div class='row'><b>Actor Name : </b> " + data.results[k].name + "<br /><br />";
+                        
+                        if (data.results[k].profile_path != null){
+                            img = "<img class='img-responsive poster-img' src='https://image.tmdb.org/t/p/w300"+ data.results[k].profile_path + "' alt='' />";
+                        }
+                        else{
+                            img = "<img class='img-responsive poster-img poster-no-img' src='/"+ imgholder + "' alt='' />";
+                        }
+                        
+                        for (var i in data.results[k].known_for){
+                            movies = movies + data.results[k].known_for[i].title + "<br />";
+                        }
+                        
+                        name = name + img + movies + "<br /></div>";
+                    }
+                    text = name;
+                    $("#results-error").html('');
+                    $("#results-actors").html(text);
+                    $("#results-actors").show();
+                    
+                
+                }).catch(function (obj, status, error){
+                    $("#results-error").html("<h3 class='alert alert-warning text-center'><b>NOT Results Found.</b><br /> Please Try a Different Keyword.</h3>");
+                    hideResults();
+            });
+            $("#actor").val(actor);
+        }
+        
+        
+        if (searchkey == 'id' && $("#id").val()){
+            $("#results-section").show();
+            var id = $("#id").val();
+            
+            resetFields();
+            
+            var text = '';
+            var ac = '<b>Actors : </b><br />';
+            
+            $.get("https://api.themoviedb.org/3/movie/"+id+"?api_key=516690c20ed973d48083f5d124cf339d")
+                .then(function (results){
+                    //let text = '';
+                    let summary = '';
+                    let title = '';
+                    let actor = ''; 
+                    let img = '';
+                    let vote = '';
+                    let pop = '';
+                    
+                    for (var k in results){
+                        if (k == 'title'){
+                            title = "<b>Movie Title :</b> " + results[k] + "<br /><br />";
+                        }
+                        
+                        if (k == 'overview'){
+                            summary = "<b>Summary :</b> " + results[k] + "<br /><br />";
+                        }                       
+                        
+                        if (k == 'poster_path'){
+                            img = "<img class='img-responsive' src='https://image.tmdb.org/t/p/w300/" + results[k] +"' alt='' />";
+                        }
+                        
+                        if (k == 'vote_average'){
+                            vote = "<b>Votes : </b>" + results[k] + "<br /><br />";
+                        }
+                        
+                        if (k == 'popularity'){
+                            pop = "<b>Likes : </b>" + results[k] + "<br /><br />";
+                        }
+                        text = title + summary + vote + pop;
+                    }
+                    
+                    $.get("https://api.themoviedb.org/3/movie/"+id+"/credits?api_key=516690c20ed973d48083f5d124cf339d")
+                        .then(function(results){
+                            for (var k in results.cast){
+                                ac = ac + results.cast[k].name + "<br />";
+                                actorsArray.push(results.cast[k].name);
+                            }
+                        
+                        $("#results-box-actor").html(ac);
+                        }).catch(function(obj, status, error){
+                            console.log("error");
+                        });
+                    
+                    $("#results-director").hide();
+                    $("#sortActorBox").show();
+                    $("#results-error").html('');
+                    $("#results-box").html(text);
+                    $("#results-img").html(img);
+                    $("#results-box").show();
+                    $("#results-img-box").show();
+                    
+                    
+                    //console.log(results);
+                }).catch(function (obj, status, error){
+                    //console.log(status);
+                    $("#results-error").html("<h3 class='alert alert-warning text-center'><b>NOT Results Found.</b><br /> Please Try a Different Keyword.</h3>");
+                    hideResults();
+            });
+                
+            
+            $("#id").val(id);
+        }
+        else{
+            $("#results-section").show();
+            $("#results-error").html("<h3 class='alert alert-danger text-center'>Please enter a search key</h3>");
+            hideResults();
+            
+            $("#id").val(id);
+        }
+                
+            
+        
+        
+        function resetFields(){
+            var numItems = $('.form-control').length;
+            for (var i=1; i<numItems; i++){
+                $('.form-control').val('');
+            }
+        }
+        
+        function hideResults(){
+            $("#results-box").html('');
+            $("#results-img").html('');
+            $("#results-actors").html('');
+            $("#sortActorBox").hide();
+            $("#results-title").html('');
+            $("#results-actors").hide();
+            $("#results-title").hide();
+            $("#results-director").html('');
+            $("#results-box-actor").html('');
+            
+        }
+        
+        
+        
+        
+    }
+    
+    function sortActor(id){
+        var sortArray = [];
+        //let sortActorValues = 
+        //let sortMovieValues = '<b>Filmography :</b><br />';
+        var sortValues = '';
+        if (id == 'actors'){
+            sortArray = actorsArray.slice();
+            sortValues = '<b>Actors : </b><br />';
+        }
+        if (id == 'movies'){
+            sortArray = moviesArray.slice();
+            sortValues = '<b>Filmography :</b><br />';
+        }
+        let getOption = $("#sortSelector").val();
+        
+        if (getOption == 'asc'){
+            sortArray.sort();
+        }
+        if (getOption == 'desc'){
+            sortArray.sort();
+            sortArray.reverse();
+        }
+        //console.log(sortArray);
+        for (var i = 0; i<sortArray.length; i++){
+            sortValues = sortValues  + sortArray[i] + "<br />";
+        }
+        
+        //console.log(sortValues);
+        
+        $("#results-box-actor").html(sortValues);
+    }
+
+</script>
+    
+<section class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><h1>IMBD Search</h1></div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="form-group">
+                                <label>Search by Title:</label>
+                                <input class="form-control" type="text" id="title" name="title" />                                
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-default" onclick="searchMovies('title');">Search</button>
+                            </div>
+                        </div>                        
+                    </div>
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="form-group">
+                                <label>Search by Director:</label>
+                                <input class="form-control" type="text" id="director" name="director" />
+                            </div> 
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-default" onclick="searchMovies('director');">Search</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="form-group">
+                                <label>Search by Actor:</label>
+                                <input class="form-control" type="text" id="actor" name="actor" />
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-default" onclick="searchMovies('actor');">Search</button>
+                        </div> 
+                    </div>
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="form-group">
+                                <label>Search by IMDB ID:</label>
+                                <input class="form-control" type="text" id="id" name="id" />
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-default" onclick="searchMovies('id');">Search</button>
+                        </div>
+                    </div>
+                </div>
+                
+                    
+                    
+                    
+            </div>
+        </div>
+    </div>        
+</section>
+    
+<section id="results-section" class="container" style="display: none;">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><h1>Search Results</h1></div>
+                <div class="panel-body">
+                    <div class="col-md-12">
+                        <div id="results-error"></div>
+                    </div>
+                    <div class="col-md-8">
+                        <div id="results-box" style="display:none;"></div>
+                        <div id="results-box-actor"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div id="results-img-box" style="display:none;">
+                            <div class="form-group">
+                                <div id="results-img"></div>
+                            </div>
+
+
+                            <div id="sortActorBox" class="form-group" style="display:none;">
+                                <label>Sort Actors By</label>
+                                <select class="form-control" id="sortSelector" name="sortActors" onchange="sortActor('actors');">
+                                    <option value="">Select Sort</option>
+                                    <option value="asc">Sort A - Z</option>
+                                    <option value="desc">Sort Z- A</option>
+                                </select>
+                            </div>
+
+                            <div id="sortMoviesBox" class="form-group" style="display:none;">
+                                <label>Sort By</label>
+                                <select class="form-control" id="sortSelector" name="sortActors" onchange="sortMovies('movies');">
+                                    <option value="">Select Sort</option>
+                                    <option value="asc">Sort A - Z</option>
+                                    <option value="desc">Sort Z- A</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="col-md-12">
+                        <div id="results-title"></div>
+                    </div>
+                    <div class="col-md-12">
+                        <div id="results-actors"></div>
+                    </div>
+                    <div class="col-md-12">
+                        <div id="results-director"></div>
+                    </div>
+                </div>
+                
+            </div>            
+        </div>
+    </div>
+</section>
+    
+    
+</body>
+</html>
